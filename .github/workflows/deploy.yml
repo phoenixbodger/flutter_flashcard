@@ -11,7 +11,9 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      
+      with:
+        fetch-depth: 0
+        
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
@@ -25,9 +27,24 @@ jobs:
       run: flutter build web --base-href "/flutter_flashcard/"
       
     - name: Deploy to GitHub Pages
-      uses: maxheld/ghpages@v0.2.1
-      with:
-        repo: phoenixbodger/flutter_flashcard
-        target_branch: gh-pages
-        build_dir: build/web
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        
+        # Create or checkout gh-pages branch
+        if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
+          git checkout gh-pages
+        else
+          git checkout --orphan gh-pages
+          git rm -rf .
+        fi
+        
+        # Copy build files
+        cp -r build/web/* .
+        
+        # Add and commit
+        git add .
+        git commit -m "Deploy to GitHub Pages"
+        
+        # Push to gh-pages
+        git push origin gh-pages
