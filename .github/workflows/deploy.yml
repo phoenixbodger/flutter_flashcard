@@ -7,11 +7,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      deployments: write
-      
+    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -29,7 +25,8 @@ jobs:
       run: flutter build web --base-href "/flutter_flashcard/"
       
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+      uses: JamesIves/github-pages-deploy@v4
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./build/web
+        branch: gh-pages
+        folder: build/web
+        token: ${{ secrets.GITHUB_TOKEN }}
