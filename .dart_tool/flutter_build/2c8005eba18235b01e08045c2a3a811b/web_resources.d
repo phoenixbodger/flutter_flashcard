@@ -1,0 +1,1 @@
+ build/web/index.html:  /home/runner/work/flutter_flashcard/flutter_flashcard/web/index.html
