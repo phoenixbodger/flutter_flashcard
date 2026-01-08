@@ -24,9 +24,13 @@ jobs:
     - name: Build web app
       run: flutter build web --base-href "/flutter_flashcard/"
       
-    - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy@v4
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
+      
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
       with:
-        branch: gh-pages
-        folder: build/web
-        token: ${{ secrets.GITHUB_TOKEN }}
+        path: ./build/web
+        
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v4
