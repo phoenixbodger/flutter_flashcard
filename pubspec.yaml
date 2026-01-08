@@ -24,4 +24,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/sounds/
+    - assets/sounds/  
+  web:
+    base_href: "/flutter_flashcard/"
+
