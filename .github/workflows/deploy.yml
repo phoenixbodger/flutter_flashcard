@@ -34,24 +34,20 @@ jobs:
         # Create or checkout gh-pages branch
         if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
           git checkout gh-pages
+          git rm -rf .
         else
           git checkout --orphan gh-pages
           git rm -rf .
         fi
         
-        # Remove all files first
-        git rm -rf . || true
+        # Copy everything including hidden files
+        cp -r build/web/. .
         
-        # Copy ALL build files including subdirectories
-        cp -r build/web/* .
+        # List all files to verify
+        echo "Files in current directory:"
+        find . -type f
         
-        # Copy hidden files too
-        cp build/web/.* . 2>/dev/null || true
-        
-        # List files to verify
-        ls -la
-        
-        # Add and commit
+        # Add everything
         git add .
         git add -A
         git commit -m "Deploy to GitHub Pages"
