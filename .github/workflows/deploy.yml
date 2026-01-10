@@ -39,12 +39,22 @@ jobs:
           git rm -rf .
         fi
         
-        # Copy build files
+        # Remove all files first
+        git rm -rf . || true
+        
+        # Copy ALL build files including subdirectories
         cp -r build/web/* .
+        
+        # Copy hidden files too
+        cp build/web/.* . 2>/dev/null || true
+        
+        # List files to verify
+        ls -la
         
         # Add and commit
         git add .
+        git add -A
         git commit -m "Deploy to GitHub Pages"
         
         # Push to gh-pages
-        git push origin gh-pages
+        git push origin gh-pages --force
