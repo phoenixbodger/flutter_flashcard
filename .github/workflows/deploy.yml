@@ -31,6 +31,10 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
+        # Clean untracked files
+        git clean -fd
+        git stash -u
+        
         # Create or checkout gh-pages branch
         if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
           git checkout gh-pages
@@ -40,12 +44,12 @@ jobs:
           git rm -rf .
         fi
         
-        # Copy everything including hidden files
+        # Copy everything from build/web
         cp -r build/web/. .
         
-        # List all files to verify
-        echo "Files in current directory:"
-        find . -type f
+        # List files to verify
+        echo "Files deployed:"
+        find . -type f | head -20
         
         # Add everything
         git add .
