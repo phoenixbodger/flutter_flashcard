@@ -430,6 +430,7 @@ class _HomeScreenState extends State<HomeScreen> {
               backgroundColor: Colors.green,
             ),
           );
+          Navigator.of(context).pop();
         }
       }
     } catch (e) {
@@ -445,7 +446,6 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _isLoading = false;
       });
-      Navigator.of(context).pop();
     }
   }
 
@@ -1059,6 +1059,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
 
 
 
