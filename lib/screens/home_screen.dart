@@ -445,6 +445,7 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _isLoading = false;
       });
+      Navigator.of(context).pop();
     }
   }
 
@@ -1058,5 +1059,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
 
 
