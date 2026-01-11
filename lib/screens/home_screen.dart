@@ -149,9 +149,6 @@ class _HomeScreenState extends State<HomeScreen> {
       
       final csvContent = csvLines.join('\n');
       final fileName = '${deck.title.replaceAll(RegExp(r'[^\w\s-]'), '').trim()}.csv';
-
-      // After successful parsing, add:
-      Navigator.of(context).pop();
       
       // Show dialog with options
       if (mounted) {
@@ -1061,4 +1058,5 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
 
