@@ -39,8 +39,27 @@ class _HomeScreenState extends State<HomeScreen> {
       final decksJson = html.window.localStorage['flashcard_decks'];
       if (decksJson != null && decksJson.isNotEmpty) {
         final List<dynamic> decksList = jsonDecode(decksJson);
-        _decks = decksList.map((deckJson) => DeckString.fromJson(deckJson).toGenericDeck()).toList();
-        setState(() {});
+        final List<Deck> loadedDecks = [];
+        
+        for (final deckJson in decksList) {
+          try {
+            final deckString = DeckString.fromJson(deckJson);
+            final deck = deckString.toGenericDeck();
+            if (deck.title.isNotEmpty) {
+              loadedDecks.add(deck);
+            }
+          } catch (e) {
+            print('Error loading individual deck: $e');
+            // Skip invalid decks
+            continue;
+          }
+        }
+        
+        if (mounted) {
+          setState(() {
+            _decks = loadedDecks;
+          });
+        }
       }
     } catch (e) {
       print('Error loading decks from storage: $e');
@@ -433,7 +452,6 @@ class _HomeScreenState extends State<HomeScreen> {
               backgroundColor: Colors.green,
             ),
           );
-          Navigator.of(context).pop();
         }
       }
     } catch (e) {
@@ -1062,8 +1080,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-
-
-
-
