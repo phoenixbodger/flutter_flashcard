@@ -423,6 +423,9 @@ class _HomeScreenState extends State<HomeScreen> {
         // Save to Local Storage
         await _saveDecksToStorage();
         
+        // Force reload decks from storage to ensure consistency
+        await _loadDecksFromStorage();
+        
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -1059,6 +1062,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
 
 
 
