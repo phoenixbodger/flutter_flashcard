@@ -272,18 +272,25 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   Future<void> _loadDefaultDecksIfNeeded() async {
     try {
+      print('🔍 Checking if default decks needed...');
       final decksJson = html.window.localStorage['flashcard_decks'];
+      print('📊 Current decks in storage: ${decksJson?.length ?? 0} chars');
+      
       if (decksJson == null || decksJson.isEmpty) {
+        print('📦 No decks found, loading defaults...');
         // User has no decks, load defaults
         await DefaultDeckService.loadDefaultDecks();
         // Reload decks from storage after adding defaults
         await _loadDecksFromStorage();
+        print('✅ Default decks loaded and reloaded');
       } else {
+        print('📋 User has decks, loading existing...');
         // User has decks, just load them
         await _loadDecksFromStorage();
+        print('✅ Existing decks loaded');
       }
     } catch (e) {
-      print('Error checking for default decks: $e');
+      print('❌ Error checking for default decks: $e');
     }
   }
 
