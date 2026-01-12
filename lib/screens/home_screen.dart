@@ -3,8 +3,11 @@ import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:universal_html/html.dart' as html;
 import '../models/flashcard_model.dart';
+import '../models/category_model.dart';
 import '../services/import_service.dart';
 import '../services/settings_service.dart';
+import '../services/default_deck_service.dart';
+import '../services/category_service.dart';
 import 'deck_management_screen.dart';
 import 'deck_viewer_screen.dart';
 import 'match_game_screen.dart';
@@ -23,6 +26,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ImportService _importService = ImportService();
   List<Deck> _decks = [];
+  List<Category> _categories = [];
+  String? _selectedCategoryId;
   bool _isLoading = false;
   bool _isSelectionMode = false;
   Set<String> _selectedDecks = {};
@@ -30,7 +35,256 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadDecksFromStorage();
+    _loadDefaultDecksIfNeeded().then((_) {
+      _loadCategories();
+    });
+  }
+
+  // Load categories
+  Future<void> _loadCategories() async {
+    try {
+      await CategoryService.initializeDefaultCategory();
+      final categories = await CategoryService.getCategories();
+      
+      if (mounted) {
+        setState(() {
+          _categories = categories;
+          // Select first category by default
+          if (_categories.isNotEmpty && _selectedCategoryId == null) {
+            _selectedCategoryId = _categories.first.id;
+          }
+        });
+      }
+    } catch (e) {
+      print('Error loading categories: $e');
+    }
+  }
+
+  // Get filtered decks for selected category
+  List<Deck> get _filteredDecks {
+    if (_selectedCategoryId == null) return _decks;
+    
+    final selectedCategory = _categories.firstWhere(
+      (cat) => cat.id == _selectedCategoryId,
+      orElse: () => _categories.first,
+    );
+    
+    return _decks.where((deck) => 
+      selectedCategory.deckIds.contains(deck.title)
+    ).toList();
+  }
+
+  // Add new category
+  Future<void> _addCategory() async {
+    final controller = TextEditingController();
+    
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Category'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Category Name',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+    
+    if (result != null && result.isNotEmpty) {
+      await CategoryService.addCategory(result);
+      await _loadCategories();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Category "$result" added'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    }
+  }
+
+  // Copy deck to different category
+  Future<void> _copyDeckToCategory(String deckTitle) async {
+    final currentCategory = _categories.firstWhere(
+      (cat) => cat.id == _selectedCategoryId,
+      orElse: () => _categories.first,
+    );
+    
+    final targetCategoryId = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Copy "$deckTitle"'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Copy from "${currentCategory.name}" to:'),
+            const SizedBox(height: 16),
+            ..._categories.where((cat) => cat.id != _selectedCategoryId).map((category) {
+              return ListTile(
+                leading: Icon(
+                  category.isDefault ? Icons.folder : Icons.create_new_folder,
+                  color: category.isDefault ? Colors.blue : Colors.grey[600],
+                ),
+                title: Text(category.name),
+                onTap: () => Navigator.pop(context, category.id),
+              );
+            }),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+    
+    if (targetCategoryId != null) {
+      await CategoryService.addDeckToCategory(deckTitle, targetCategoryId);
+      await _loadCategories();
+      
+      if (mounted) {
+        final targetCategory = _categories.firstWhere((cat) => cat.id == targetCategoryId);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Copied "$deckTitle" to "${targetCategory.name}"'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    }
+  }
+
+  // Move deck to different category
+  Future<void> _moveDeckToCategory(String deckTitle) async {
+    final currentCategory = _categories.firstWhere(
+      (cat) => cat.id == _selectedCategoryId,
+      orElse: () => _categories.first,
+    );
+    
+    final targetCategoryId = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Move "$deckTitle"'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Move from "${currentCategory.name}" to:'),
+            const SizedBox(height: 16),
+            ..._categories.where((cat) => cat.id != _selectedCategoryId).map((category) {
+              return ListTile(
+                leading: Icon(
+                  category.isDefault ? Icons.folder : Icons.create_new_folder,
+                  color: category.isDefault ? Colors.blue : Colors.grey[600],
+                ),
+                title: Text(category.name),
+                onTap: () => Navigator.pop(context, category.id),
+              );
+            }),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+    
+    if (targetCategoryId != null) {
+      await CategoryService.moveDeckToCategory(deckTitle, currentCategory.id, targetCategoryId);
+      await _loadCategories();
+      
+      if (mounted) {
+        final targetCategory = _categories.firstWhere((cat) => cat.id == targetCategoryId);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Moved "$deckTitle" to "${targetCategory.name}"'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    }
+  }
+  Future<void> _deleteCategory(String categoryId) async {
+    final category = _categories.firstWhere((cat) => cat.id == categoryId);
+    
+    if (category.isDefault) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Cannot delete default category'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+    
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete "${category.name}"?'),
+        content: const Text('This will delete the category but keep the decks. Are you sure?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirmed == true) {
+      await CategoryService.deleteCategory(categoryId);
+      await _loadCategories();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Category "${category.name}" deleted'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    }
+  }
+  Future<void> _loadDefaultDecksIfNeeded() async {
+    try {
+      final decksJson = html.window.localStorage['flashcard_decks'];
+      if (decksJson == null || decksJson.isEmpty) {
+        // User has no decks, load defaults
+        await DefaultDeckService.loadDefaultDecks();
+        // Reload decks from storage after adding defaults
+        await _loadDecksFromStorage();
+      } else {
+        // User has decks, just load them
+        await _loadDecksFromStorage();
+      }
+    } catch (e) {
+      print('Error checking for default decks: $e');
+    }
   }
 
   // Load decks from Local Storage
@@ -538,9 +792,77 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
         ],
       ),
-      body: _decks.isEmpty
-          ? _buildEmptyState()
-          : _buildDeckList(),
+      body: Column(
+        children: [
+          // Category selector
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                const Text(
+                  'Category:',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: DropdownButton<String>(
+                    value: _selectedCategoryId,
+                    isExpanded: true,
+                    items: _categories.map((category) {
+                      return DropdownMenuItem<String>(
+                        value: category.id,
+                        child: Row(
+                          children: [
+                            Icon(
+                              category.isDefault ? Icons.folder : Icons.create_new_folder,
+                              size: 16,
+                              color: category.isDefault ? Colors.blue : Colors.grey[600],
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                category.name,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (!category.isDefault)
+                              IconButton(
+                                onPressed: () => _deleteCategory(category.id),
+                                icon: const Icon(Icons.delete, size: 16),
+                                tooltip: 'Delete Category',
+                              ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _selectedCategoryId = value;
+                        });
+                      }
+                    },
+                  ),
+                ),
+                IconButton(
+                  onPressed: _addCategory,
+                  icon: const Icon(Icons.add),
+                  tooltip: 'Add Category',
+                ),
+              ],
+            ),
+          ),
+          // Deck list
+          Expanded(
+            child: _filteredDecks.isEmpty
+                ? _buildEmptyState()
+                : _buildDeckList(),
+          ),
+        ],
+      ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -748,7 +1070,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildDeckList() {
-    print('Building deck list with ${_decks.length} decks');
+    final decksToShow = _filteredDecks;
+    print('Building deck list with ${decksToShow.length} decks in category');
     return Column(
       children: [
         if (_isSelectionMode)
@@ -778,9 +1101,9 @@ class _HomeScreenState extends State<HomeScreen> {
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: _decks.length,
+            itemCount: decksToShow.length,
             itemBuilder: (context, index) {
-              final deck = _decks[index];
+              final deck = decksToShow[index];
               final isSelected = _selectedDecks.contains(deck.title);
               
               return Card(
@@ -859,6 +1182,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                           tooltip: 'Delete Deck',
                                           iconSize: 20,
                                         ),
+                                        IconButton(
+                                          onPressed: () {
+                                            _moveDeckToCategory(deck.title);
+                                          },
+                                          icon: const Icon(Icons.drive_file_move_outline, color: Colors.blue),
+                                          tooltip: 'Move Deck',
+                                          iconSize: 20,
+                                        ),
+                                        IconButton(
+                                          onPressed: () {
+                                            _copyDeckToCategory(deck.title);
+                                          },
+                                          icon: const Icon(Icons.content_copy, color: Colors.green),
+                                          tooltip: 'Copy Deck',
+                                          iconSize: 20,
+                                        ),
                                       ],
                                     ],
                                   ),
@@ -933,13 +1272,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(height: 4),
                               !SettingsService.isCompactMode
                                   ? SizedBox(
-                                      width: 100,
+                                      width: 130,
                                       child: TextButton.icon(
                                         onPressed: () => _downloadDeck(deck),
                                         icon: const Icon(Icons.download, size: 16),
                                         label: const Text('Download'),
                                         style: TextButton.styleFrom(
-                                          minimumSize: const Size(120, 36),
+                                          minimumSize: const Size(130, 36),
                                         ),
                                       ),
                                     )
@@ -949,6 +1288,48 @@ class _HomeScreenState extends State<HomeScreen> {
                                         onPressed: () => _downloadDeck(deck),
                                         icon: const Icon(Icons.download, size: 16),
                                         tooltip: 'Download',
+                                      ),
+                                    ),
+                              const SizedBox(height: 4),
+                              !SettingsService.isCompactMode
+                                  ? SizedBox(
+                                      width: 130,
+                                      child: TextButton.icon(
+                                        onPressed: () => _moveDeckToCategory(deck.title),
+                                        icon: const Icon(Icons.drive_file_move_outline, size: 16),
+                                        label: const Text('Move'),
+                                        style: TextButton.styleFrom(
+                                          minimumSize: const Size(130, 36),
+                                        ),
+                                      ),
+                                    )
+                                  : SizedBox(
+                                      width: 48,
+                                      child: IconButton(
+                                        onPressed: () => _moveDeckToCategory(deck.title),
+                                        icon: const Icon(Icons.drive_file_move_outline, size: 16),
+                                        tooltip: 'Move',
+                                      ),
+                                    ),
+                              const SizedBox(height: 4),
+                              !SettingsService.isCompactMode
+                                  ? SizedBox(
+                                      width: 130,
+                                      child: TextButton.icon(
+                                        onPressed: () => _copyDeckToCategory(deck.title),
+                                        icon: const Icon(Icons.content_copy, size: 16),
+                                        label: const Text('Copy'),
+                                        style: TextButton.styleFrom(
+                                          minimumSize: const Size(130, 36),
+                                        ),
+                                      ),
+                                    )
+                                  : SizedBox(
+                                      width: 48,
+                                      child: IconButton(
+                                        onPressed: () => _copyDeckToCategory(deck.title),
+                                        icon: const Icon(Icons.content_copy, size: 16),
+                                        tooltip: 'Copy',
                                       ),
                                     ),
                             ],
