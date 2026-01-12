@@ -25,47 +25,66 @@ class DefaultDeckService {
 
   static Future<void> loadDefaultDecks() async {
     try {
+      print('🚀 Starting to load default decks...');
+      
       // First ensure default category exists
       await CategoryService.initializeDefaultCategory();
+      print('✅ Default category initialized');
       
       for (final deckInfo in _defaultDecks) {
-        final String csvContent = await rootBundle.loadString(deckInfo['file']!);
-        final List<String> lines = csvContent.split('\n');
+        print('📦 Loading deck: ${deckInfo['name']} from ${deckInfo['file']}');
         
-        if (lines.isNotEmpty) {
-          final List<String> headers = lines.first.split(',');
-          final List<Flashcard<String>> flashcards = [];
+        try {
+          final String csvContent = await rootBundle.loadString(deckInfo['file']!);
+          print('✅ Successfully loaded ${deckInfo['file']} (${csvContent.length} chars)');
           
-          for (int i = 1; i < lines.length; i++) {
-            final line = lines[i].trim();
-            if (line.isNotEmpty) {
-              final List<String> sides = line.split(',');
-              if (sides.length >= 2) {
-                flashcards.add(Flashcard<String>(
-                  id: 'default_${deckInfo['name']}_$i',
-                  sides: sides.map((side) => side.trim()).toList(),
-                ));
+          final List<String> lines = csvContent.split('\n');
+          print('📄 Found ${lines.length} lines in CSV');
+          
+          if (lines.isNotEmpty) {
+            final List<String> headers = lines.first.split(',');
+            final List<Flashcard<String>> flashcards = [];
+            
+            for (int i = 1; i < lines.length; i++) {
+              final line = lines[i].trim();
+              if (line.isNotEmpty) {
+                final List<String> sides = line.split(',');
+                if (sides.length >= 2) {
+                  flashcards.add(Flashcard<String>(
+                    id: 'default_${deckInfo['name']}_$i',
+                    sides: sides.map((side) => side.trim()).toList(),
+                  ));
+                }
               }
             }
-          }
-          
-          if (flashcards.isNotEmpty) {
-            final deck = Deck<String>(
-              title: deckInfo['name']!,
-              cards: flashcards,
-              headers: headers,
-            );
             
-            // Save to localStorage using existing service
-            await _saveDeckToStorage(deck);
+            print('🃏 Created ${flashcards.length} flashcards');
             
-            // Add deck to default category
-            await CategoryService.addDeckToCategory(deck.title, 'default');
+            if (flashcards.isNotEmpty) {
+              final deck = Deck<String>(
+                title: deckInfo['name']!,
+                cards: flashcards,
+                headers: headers,
+              );
+              
+              // Save to localStorage using existing service
+              await _saveDeckToStorage(deck);
+              print('💾 Saved deck "${deck.title}" to storage');
+              
+              // Add deck to default category
+              await CategoryService.addDeckToCategory(deck.title, 'default');
+              print('📁 Added deck "${deck.title}" to default category');
+            }
           }
+        } catch (e) {
+          print('❌ Error loading deck ${deckInfo['name']}: $e');
+          continue;
         }
       }
+      
+      print('✅ Finished loading default decks');
     } catch (e) {
-      print('Error loading default decks: $e');
+      print('❌ Error loading default decks: $e');
     }
   }
 
