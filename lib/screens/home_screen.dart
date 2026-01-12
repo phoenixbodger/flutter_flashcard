@@ -276,6 +276,12 @@ class _HomeScreenState extends State<HomeScreen> {
       final decksJson = html.window.localStorage['flashcard_decks'];
       print('📊 Current decks in storage: ${decksJson?.length ?? 0} chars');
       
+      // Always check if default category has decks
+      await CategoryService.initializeDefaultCategory();
+      final categories = await CategoryService.getCategories();
+      final defaultCategory = categories.firstWhere((cat) => cat.isDefault);
+      print('📁 Default category "${defaultCategory.name}" has ${defaultCategory.deckIds.length} decks');
+      
       if (decksJson == null || decksJson.isEmpty) {
         print('📦 No decks found, loading defaults...');
         // User has no decks, load defaults
@@ -283,6 +289,12 @@ class _HomeScreenState extends State<HomeScreen> {
         // Reload decks from storage after adding defaults
         await _loadDecksFromStorage();
         print('✅ Default decks loaded and reloaded');
+      } else if (defaultCategory.deckIds.isEmpty) {
+        print('📦 Decks exist but not in Default category, reassigning...');
+        // User has decks but default category is empty, reassign defaults
+        await DefaultDeckService.loadDefaultDecks();
+        await _loadDecksFromStorage();
+        print('✅ Default decks reassigned to Default category');
       } else {
         print('📋 User has decks, loading existing...');
         // User has decks, just load them
