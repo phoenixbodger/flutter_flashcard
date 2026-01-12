@@ -748,6 +748,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildDeckList() {
+    print('Building deck list with ${_decks.length} decks');
     return Column(
       children: [
         if (_isSelectionMode)
@@ -877,9 +878,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 12),
                         // Action buttons (only in non-selection mode)
                         if (!_isSelectionMode)
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               !SettingsService.isCompactMode
                                   ? SizedBox(
@@ -912,6 +912,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         tooltip: 'Study',
                                       ),
                                     ),
+                              const SizedBox(height: 4),
                               !SettingsService.isCompactMode
                                   ? SizedBox(
                                       width: 100,
@@ -929,8 +930,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                         tooltip: 'Game',
                                       ),
                                     ),
+                              const SizedBox(height: 4),
                               !SettingsService.isCompactMode
-                                  ? Flexible(
+                                  ? SizedBox(
+                                      width: 100,
                                       child: TextButton.icon(
                                         onPressed: () => _downloadDeck(deck),
                                         icon: const Icon(Icons.download, size: 16),
