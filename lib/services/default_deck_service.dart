@@ -8,17 +8,17 @@ class DefaultDeckService {
   static const List<Map<String, String>> _defaultDecks = [
     {
       'name': 'Chinese Radicals',
-      'file': 'decks/Chinese_Radicals.csv',
+      'file': 'assets/decks/Chinese_Radicals.csv',
       'description': 'List of Chinese Radicals and definitions'
     },
         {
       'name': 'Chinese Expressions for TV and Movies',
-      'file': 'decks/Expressions_for_TV_and_Movies.csv',
+      'file': 'assets/decks/Expressions_for_TV_and_Movies.csv',
       'description': 'list of Chinese expressions for Tv and Movies'
     },
         {
       'name': 'Hiragana',
-      'file': 'decks/Hirigana.csv',
+      'file': 'assets/decks/Hirigana.csv',
       'description': 'Japanese Hiragana characters'
     },
   ];
@@ -116,3 +116,4 @@ class DefaultDeckService {
     }
   }
 }
+
