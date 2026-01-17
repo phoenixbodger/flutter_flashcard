@@ -721,6 +721,11 @@ class _HomeScreenState extends State<HomeScreen> {
         // Force reload decks from storage to ensure consistency
         await _loadDecksFromStorage();
         
+        // Force UI refresh
+        if (mounted) {
+          setState(() {});
+        }
+        
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -1038,6 +1043,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 
                 // Force reload decks from storage to ensure consistency
                 await _loadDecksFromStorage();
+                
+                // Force UI refresh
+                if (mounted) {
+                  setState(() {});
+                }
                 
                 Navigator.pop(context, true);
                 
