@@ -1006,7 +1006,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               if (titleController.text.trim().isNotEmpty && 
                   side1Controller.text.trim().isNotEmpty && 
                   side2Controller.text.trim().isNotEmpty) {
@@ -1028,7 +1028,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 });
                 
                 // Save to Local Storage
-                _saveDecksToStorage();
+                await _saveDecksToStorage();
+                
+                // Force reload decks from storage to ensure consistency
+                await _loadDecksFromStorage();
                 
                 Navigator.pop(context, true);
                 
