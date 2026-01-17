@@ -715,6 +715,9 @@ class _HomeScreenState extends State<HomeScreen> {
         // Save to Local Storage
         await _saveDecksToStorage();
         
+        // Add deck to default category
+        await CategoryService.addDeckToCategory(newDeck.title, 'default');
+        
         // Force reload decks from storage to ensure consistency
         await _loadDecksFromStorage();
         
@@ -1029,6 +1032,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 
                 // Save to Local Storage
                 await _saveDecksToStorage();
+                
+                // Add deck to default category
+                await CategoryService.addDeckToCategory(newDeck.title, 'default');
                 
                 // Force reload decks from storage to ensure consistency
                 await _loadDecksFromStorage();
