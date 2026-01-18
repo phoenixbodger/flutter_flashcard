@@ -20,7 +20,9 @@ class SoundService {
 
   Future<void> _playSoundWeb(String fileName) async {
     try {
-      final audio = html.AudioElement('assets/sounds/$fileName');
+      // Use full URL for GitHub Pages
+      final audioUrl = 'https://phoenixbodger.github.io/flutter_flashcard/assets/sounds/$fileName';
+      final audio = html.AudioElement(audioUrl);
       audio.play();
     } catch (e) {
       if (kDebugMode) {
