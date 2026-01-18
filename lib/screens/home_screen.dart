@@ -751,6 +751,51 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  // Refresh decks and categories
+  Future<void> _refreshDecks() async {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      print('🔄 Refreshing decks and categories...');
+      
+      // Reload categories first
+      await _loadCategories();
+      
+      // Reload decks from storage
+      await _loadDecksFromStorage();
+      
+      print('✅ Refresh completed');
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Decks refreshed!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+    } catch (e) {
+      print('❌ Error refreshing: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error refreshing: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -759,6 +804,11 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Flashcard App'),
         elevation: 0,
         actions: [
+          IconButton(
+            onPressed: _refreshDecks,
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh Decks',
+          ),
           IconButton(
             onPressed: () {
               Navigator.push(
