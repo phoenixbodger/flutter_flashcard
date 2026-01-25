@@ -1324,17 +1324,37 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  // Deck title row
                                   Row(
                                     children: [
-                                      Text(
-                                        deck.title,
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w600,
+                                      Expanded(
+                                        child: Text(
+                                          deck.title,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 2,
                                         ),
                                       ),
-                                      if (!_isSelectionMode) ...[
-                                        const SizedBox(width: 8),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  // Card count row
+                                  Text(
+                                    '${deck.cards.length} ${deck.cards.length == 1 ? 'card' : 'cards'}',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  // Action icons row (only when not in selection mode)
+                                  if (!_isSelectionMode) ...[
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
                                         IconButton(
                                           onPressed: () {
                                             Navigator.push(
@@ -1386,16 +1406,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                           iconSize: 20,
                                         ),
                                       ],
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '${deck.cards.length} ${deck.cards.length == 1 ? 'card' : 'cards'}',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey[600],
                                     ),
-                                  ),
+                                  ],
                                 ],
                               ),
                             ),
