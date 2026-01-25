@@ -23,6 +23,10 @@ class DefaultDeckService {
     },
   ];
 
+  // Public getter for default deck names
+  static List<String> get defaultDeckNames => 
+      _defaultDecks.map((deck) => deck['name']!).toList();
+
   static Future<void> loadDefaultDecks() async {
     try {
       print('🚀 Starting to load default decks...');
@@ -116,4 +120,3 @@ class DefaultDeckService {
     }
   }
 }
-
