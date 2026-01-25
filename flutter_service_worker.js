@@ -12,7 +12,7 @@ const RESOURCES = {"flutter.js": "c71a09214cb6f5f8996a531350400a9a",
 "assets/assets/sounds/game-over.mp3": "ac747161dc668c3544fed9d60b243efa",
 "assets/assets/sounds/error.mp3": "020d440f85a04577ec073454b1b2974a",
 "assets/assets/sounds/correct.mp3": "a1a1441cd3415882326d18c3722a453b",
-"assets/fonts/MaterialIcons-Regular.otf": "1ebe478770d1e92064f462d2c7a057e5",
+"assets/fonts/MaterialIcons-Regular.otf": "70961af51311fa2d760f3168df003af3",
 "assets/NOTICES": "4b59be3e94156e54d04eb881eb4d85d9",
 "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "e986ebe42ef785b27164c36a9abc7818",
 "assets/FontManifest.json": "dc3d03800ccca4601324923c0b1d6d57",
@@ -29,7 +29,7 @@ const RESOURCES = {"flutter.js": "c71a09214cb6f5f8996a531350400a9a",
 "canvaskit/canvaskit.js.symbols": "38cba9233b92472a36ff011dc21c2c9f",
 "canvaskit/skwasm.js.symbols": "741d50ffba71f89345996b0aa8426af8",
 "version.json": "0bc248b3935bd54408b20b6c4e647744",
-"main.dart.js": "1e07fdd92ea6bf5810b61388c63add70"};
+"main.dart.js": "906f56847691a17c20bbaca52f61f70e"};
 // The application shell files that are downloaded before a service worker can
 // start.
 const CORE = ["main.dart.js",
