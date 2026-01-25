@@ -24,6 +24,7 @@ class _MatchGameScreenState extends State<MatchGameScreen> {
   Timer? _timer;
   int _secondsElapsed = 0;
   bool _gameStarted = false;
+  double _textScale = 1.0; // Zoom control for text
 
   @override
   void initState() {
@@ -465,6 +466,33 @@ class _MatchGameScreenState extends State<MatchGameScreen> {
         title: Text('Match Game - ${widget.deck.title}'),
         actions: [
           IconButton(
+            onPressed: () {
+              setState(() {
+                _textScale = (_textScale - 0.1).clamp(0.5, 2.0);
+              });
+            },
+            icon: const Icon(Icons.zoom_out),
+            tooltip: 'Zoom Out',
+          ),
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _textScale = (_textScale + 0.1).clamp(0.5, 2.0);
+              });
+            },
+            icon: const Icon(Icons.zoom_in),
+            tooltip: 'Zoom In',
+          ),
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _textScale = 1.0;
+              });
+            },
+            icon: const Icon(Icons.zoom_out_map),
+            tooltip: 'Reset Zoom',
+          ),
+          IconButton(
             onPressed: _showSettings,
             icon: const Icon(Icons.settings),
             tooltip: 'Game Settings',
@@ -523,6 +551,7 @@ class _MatchGameScreenState extends State<MatchGameScreen> {
                   return MatchCardWidget(
                     card: card,
                     onTap: () => _onCardTap(card),
+                    textScale: _textScale,
                   );
                 },
               ),
@@ -565,11 +594,13 @@ class MatchCard {
 class MatchCardWidget extends StatelessWidget {
   final MatchCard card;
   final VoidCallback onTap;
+  final double textScale;
 
   const MatchCardWidget({
     super.key,
     required this.card,
     required this.onTap,
+    required this.textScale,
   });
 
   @override
@@ -600,12 +631,14 @@ class MatchCardWidget extends StatelessWidget {
           child: card.isFlipped || card.isMatched
               ? Padding(
                   padding: const EdgeInsets.all(8),
-                  child: FittedBox(
+                  child: Center(
                     child: Text(
                       card.text,
                       textAlign: TextAlign.center,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: (20 * textScale).clamp(8, 40),
                         fontWeight: FontWeight.bold,
                         color: card.isMatched
                             ? Colors.white
