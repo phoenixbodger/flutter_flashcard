@@ -796,6 +796,100 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  // Reset default decks from assets
+  Future<void> _resetDefaultDecks() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset Default Decks'),
+        content: const Text(
+          'This will reload all default decks from the asset files. '
+          'Any changes you made to default decks will be lost. '
+          'Your custom decks will be kept.\n\nContinue?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Reset'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        print('🔄 Resetting default decks from assets...');
+        
+        // Clear existing default decks from storage
+        await _clearDefaultDecksFromStorage();
+        
+        // Reload default decks from assets
+        await DefaultDeckService.loadDefaultDecks();
+        
+        // Reload all decks from storage
+        await _loadDecksFromStorage();
+        
+        print('✅ Default decks reset completed');
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Default decks reset successfully!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (e) {
+        print('❌ Error resetting default decks: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error resetting default decks: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    }
+  }
+
+  // Clear default decks from storage
+  Future<void> _clearDefaultDecksFromStorage() async {
+    try {
+      final decksJson = html.window.localStorage['flashcard_decks'];
+      if (decksJson != null) {
+        final List<dynamic> decksList = jsonDecode(decksJson);
+        final defaultDeckNames = DefaultDeckService.defaultDeckNames.toSet();
+        
+        // Keep only non-default decks
+        final filteredDecks = decksList.where((deck) {
+          return !defaultDeckNames.contains(deck['title']);
+        }).toList();
+        
+        // Save filtered decks back to storage
+        html.window.localStorage['flashcard_decks'] = jsonEncode(filteredDecks);
+        print('🗑️ Cleared default decks from storage');
+      }
+    } catch (e) {
+      print('❌ Error clearing default decks: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -808,6 +902,11 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: _refreshDecks,
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh Decks',
+          ),
+          IconButton(
+            onPressed: _resetDefaultDecks,
+            icon: const Icon(Icons.restore),
+            tooltip: 'Reset Default Decks',
           ),
           IconButton(
             onPressed: () {
