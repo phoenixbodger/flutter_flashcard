@@ -538,20 +538,42 @@ class _MatchGameScreenState extends State<MatchGameScreen> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                  childAspectRatio: 1.2,
-                ),
-                itemCount: _cards.length,
-                itemBuilder: (context, index) {
-                  final card = _cards[index];
-                  return MatchCardWidget(
-                    card: card,
-                    onTap: () => _onCardTap(card),
-                    textScale: _textScale,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  // Calculate crossAxisCount based on screen width
+                  int crossAxisCount;
+                  double childAspectRatio;
+                  
+                  if (constraints.maxWidth > 1200) {
+                    // Large desktop
+                    crossAxisCount = 6;
+                    childAspectRatio = 1.0;
+                  } else if (constraints.maxWidth > 800) {
+                    // Desktop/tablet
+                    crossAxisCount = 5;
+                    childAspectRatio = 1.1;
+                  } else {
+                    // Mobile
+                    crossAxisCount = 4;
+                    childAspectRatio = 1.2;
+                  }
+                  
+                  return GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: 6,
+                      mainAxisSpacing: 6,
+                      childAspectRatio: childAspectRatio,
+                    ),
+                    itemCount: _cards.length,
+                    itemBuilder: (context, index) {
+                      final card = _cards[index];
+                      return MatchCardWidget(
+                        card: card,
+                        onTap: () => _onCardTap(card),
+                        textScale: _textScale,
+                      );
+                    },
                   );
                 },
               ),
