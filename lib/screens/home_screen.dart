@@ -1353,7 +1353,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   if (!_isSelectionMode) ...[
                                     const SizedBox(height: 8),
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      mainAxisAlignment: MainAxisAlignment.start,
                                       children: [
                                         IconButton(
                                           onPressed: () {
