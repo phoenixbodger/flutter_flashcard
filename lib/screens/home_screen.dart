@@ -1328,35 +1328,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Row(
                                     children: [
                                       Expanded(
-                                        child: Text(
-                                          deck.title,
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 2,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  // Card count row
-                                  Text(
-                                    '${deck.cards.length} ${deck.cards.length == 1 ? 'card' : 'cards'}',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                  // Action icons row (only when not in selection mode)
-                                  if (!_isSelectionMode) ...[
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        IconButton(
-                                          onPressed: () {
+                                        child: GestureDetector(
+                                          onTap: () {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
@@ -1377,10 +1350,36 @@ class _HomeScreenState extends State<HomeScreen> {
                                               ),
                                             );
                                           },
-                                          icon: const Icon(Icons.edit),
-                                          tooltip: 'Edit Deck',
-                                          iconSize: 20,
+                                          child: Text(
+                                            deck.title,
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.blue,
+                                              decoration: TextDecoration.underline,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 2,
+                                          ),
                                         ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  // Card count row
+                                  Text(
+                                    '${deck.cards.length} ${deck.cards.length == 1 ? 'card' : 'cards'}',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  // Action icons row (only when not in selection mode)
+                                  if (!_isSelectionMode) ...[
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
                                         IconButton(
                                           onPressed: () {
                                             _deleteDeck(deck);
