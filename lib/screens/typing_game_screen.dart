@@ -819,7 +819,7 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      height: 260,
+                      height: 500,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
