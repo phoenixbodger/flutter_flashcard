@@ -696,7 +696,7 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
                   
                   if (_showHint)
                     Container(
-                      height: 260,
+                      height: 200,
                       margin: const EdgeInsets.only(top: 16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
