@@ -818,7 +818,8 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 8),
-                    Expanded(
+                    Container(
+                      height: 200,
                       child: ListView.builder(
                         itemCount: _hintChoices.length,
                         itemBuilder: (context, index) {
