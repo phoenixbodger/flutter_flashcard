@@ -820,33 +820,40 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
                     const SizedBox(height: 8),
                     Container(
                       height: 260,
-                      child: ListView.builder(
-                        itemCount: _hintChoices.length,
-                        itemBuilder: (context, index) {
-                          final choice = _hintChoices[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: GestureDetector(
-                              onTap: () {
-                                _selectHintAnswer(choice);
-                              },
-                              child: Card(
-                                child: InkWell(
-                                  onTap: () {
-                                    _selectHintAnswer(choice);
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Text(
-                                      choice,
-                                      style: const TextStyle(fontSize: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: _hintChoices.length,
+                              itemBuilder: (context, index) {
+                                final choice = _hintChoices[index];
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      _selectHintAnswer(choice);
+                                    },
+                                    child: Card(
+                                      child: InkWell(
+                                        onTap: () {
+                                          _selectHintAnswer(choice);
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(16),
+                                          child: Text(
+                                            choice,
+                                            style: const TextStyle(fontSize: 16),
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
+                                );
+                              },
                             ),
-                          );
-                        },
+                          ),
+                        ],
                       ),
                     ),
                   ],
