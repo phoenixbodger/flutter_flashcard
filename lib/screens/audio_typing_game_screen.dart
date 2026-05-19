@@ -137,9 +137,9 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
     _generateQuestion();
     _startTimer();
     // Auto-play audio for first question
-    Future.delayed(const Duration(milliseconds: 500), () {
-      _playQuestionAudio();
-    });
+//    Future.delayed(const Duration(milliseconds: 500), () {
+//      _playQuestionAudio();
+//    });
   }
 
   void _startTimer() {
