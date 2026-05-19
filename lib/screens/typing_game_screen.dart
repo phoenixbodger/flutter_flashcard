@@ -819,7 +819,7 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      height: 200,
+                      height: 260,
                       child: ListView.builder(
                         itemCount: _hintChoices.length,
                         itemBuilder: (context, index) {
