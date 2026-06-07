@@ -32,6 +32,7 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
   TextEditingController _textController = TextEditingController();
   String _correctAnswer = '';
   List<String> _hintChoices = [];
+  Timer? _autoAdvanceTimer;
 
   @override
   void initState() {
@@ -42,6 +43,7 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    _autoAdvanceTimer?.cancel();
     _textController.dispose();
     super.dispose();
   }
@@ -156,10 +158,16 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
     allAnswers.remove(correctAnswerOriginal);
     final List<String> wrongAnswers = allAnswers.toList();
 
-    // Take 3 random wrong answers
+    // Take 3 random wrong answers, or duplicate if not enough
     final random = Random();
     wrongAnswers.shuffle(random);
-    final selectedWrongAnswers = wrongAnswers.take(3).toList();
+    final selectedWrongAnswers = <String>[];
+    
+    for (int i = 0; i < 3; i++) {
+      if (wrongAnswers.isNotEmpty) {
+        selectedWrongAnswers.add(wrongAnswers[i % wrongAnswers.length]);
+      }
+    }
 
     // Create choices list with correct answer (original case)
     _hintChoices = [correctAnswerOriginal, ...selectedWrongAnswers];
@@ -193,7 +201,8 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
     });
 
     // Auto-advance to next question after delay
-    Future.delayed(const Duration(milliseconds: 2000), () {
+    _autoAdvanceTimer?.cancel();
+    _autoAdvanceTimer = Timer(const Duration(milliseconds: 2000), () {
       if (mounted) {
         _nextQuestion();
       }
@@ -201,6 +210,9 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
   }
 
   void _markAsCorrect() {
+    // Cancel any pending auto-advance from _submitAnswer
+    _autoAdvanceTimer?.cancel();
+    
     setState(() {
       _showResult = true;
       _totalAttempts++;
@@ -213,8 +225,12 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
       }
     });
 
-    // Don't add auto-advance here since _submitAnswer already handles it
-    // This prevents double auto-advance that was skipping questions
+    // Auto-advance to next question after delay
+    _autoAdvanceTimer = Timer(const Duration(milliseconds: 2000), () {
+      if (mounted) {
+        _nextQuestion();
+      }
+    });
   }
 
   void _showHintOptions() {
@@ -819,7 +835,7 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      height: 100,
+                      height: 250,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -830,7 +846,6 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
                                 final choice = _hintChoices[index];
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 8),
-
                                   child: Card(
                                     child: InkWell(
                                       onTap: () {
