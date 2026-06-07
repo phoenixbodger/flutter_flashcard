@@ -830,21 +830,17 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
                                 final choice = _hintChoices[index];
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 8),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      _selectHintAnswer(choice);
-                                    },
-                                    child: Card(
-                                      child: InkWell(
-                                        onTap: () {
-                                          _selectHintAnswer(choice);
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(16),
-                                          child: Text(
-                                            choice,
-                                            style: const TextStyle(fontSize: 16),
-                                          ),
+
+                                  child: Card(
+                                    child: InkWell(
+                                      onTap: () {
+                                        _selectHintAnswer(choice);
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16),
+                                        child: Text(
+                                          choice,
+                                          style: const TextStyle(fontSize: 16),
                                         ),
                                       ),
                                     ),
