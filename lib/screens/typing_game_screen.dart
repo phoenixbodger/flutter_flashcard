@@ -200,13 +200,7 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
       }
     });
 
-    // Auto-advance to next question after delay
-    _autoAdvanceTimer?.cancel();
-    _autoAdvanceTimer = Timer(const Duration(milliseconds: 2000), () {
-      if (mounted) {
-        _nextQuestion();
-      }
-    });
+    // Don't auto-advance - let user manually advance when ready
   }
 
   void _markAsCorrect() {
@@ -225,12 +219,7 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
       }
     });
 
-    // Auto-advance to next question after delay
-    _autoAdvanceTimer = Timer(const Duration(milliseconds: 2000), () {
-      if (mounted) {
-        _nextQuestion();
-      }
-    });
+    // Don't auto-advance - let user manually advance when ready
   }
 
   void _showHintOptions() {
@@ -740,6 +729,25 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
                               '(Hint used - 0.5 points)',
                               style: TextStyle(color: Colors.white, fontSize: 14),
                             ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _nextQuestion,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: _textController.text.toLowerCase().trim() == _correctAnswer ? Colors.green : Colors.red,
+                                padding: const EdgeInsets.all(12),
+                              ),
+                              child: const Text(
+                                'Next Question',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
                           if (_textController.text.toLowerCase().trim() != _correctAnswer)
                             Text(
                               'Correct answer: ${_gameCards[_currentCardIndex].sides[_answerSideIndex]}',
@@ -759,6 +767,27 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
                                 ),
                                 child: const Text(
                                   'This is correct',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          if (_textController.text.toLowerCase().trim() != _correctAnswer)
+                            const SizedBox(height: 8),
+                          if (_textController.text.toLowerCase().trim() != _correctAnswer)
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: _nextQuestion,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.all(12),
+                                ),
+                                child: const Text(
+                                  'Next Question',
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
