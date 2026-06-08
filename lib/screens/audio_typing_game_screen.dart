@@ -6,6 +6,7 @@ import '../services/enhanced_tts_service.dart';
 import '../services/sound_service.dart';
 import '../services/settings_service.dart';
 
+
 class AudioTypingGameScreen extends StatefulWidget {
   final Deck deck;
 
@@ -28,7 +29,7 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
   bool _usedHintForCurrentQuestion = false;
   TextEditingController _textController = TextEditingController();
   List<String> _hintChoices = [];
-  
+
   // Audio functionality
   final EnhancedTTSService _ttsService = EnhancedTTSService();
   bool _isSpeaking = false;
@@ -62,7 +63,7 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
       // Default to first side as question, second as answer
       _questionSideIndex = 0;
       _answerSideIndex = 1;
-      
+
       // If deck has only one side, use it for both
       if (widget.deck.cards.first.sides.length == 1) {
         _answerSideIndex = 0;
@@ -72,20 +73,21 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
 
   Future<void> _playQuestionAudio() async {
     if (_gameCards.isEmpty || _currentCardIndex >= _gameCards.length) return;
-    
+
     final questionText = _gameCards[_currentCardIndex].sides[_questionSideIndex];
     if (questionText.isNotEmpty) {
+      if (!mounted) return;
       setState(() {
         _hasPlayedAudio = true;
         _isSpeaking = true;
       });
-      
+
       try {
         await _ttsService.speak(questionText, useHighQuality: true);
       } catch (e) {
         // Fallback handling
       }
-      
+
       // Check if speaking is done after a delay
       Future.delayed(const Duration(seconds: 3), () {
         if (mounted) {
@@ -100,7 +102,7 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
   void _startGame() {
     // Play game start sound
     SoundService().playGameStart();
-    
+
     // Create unique cards (no duplicate questions)
     final Map<String, Flashcard> uniqueCards = {};
     for (final card in widget.deck.cards) {
@@ -109,10 +111,10 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
         uniqueCards[question] = card;
       }
     }
-    
+
     _gameCards = uniqueCards.values.toList();
     _gameCards.shuffle();
-    
+
     // Limit question count to available unique cards
     final maxQuestions = _gameCards.length;
     if (_questionCount > maxQuestions) {
@@ -136,10 +138,6 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
 
     _generateQuestion();
     _startTimer();
-    // Auto-play audio for first question
-//    Future.delayed(const Duration(milliseconds: 500), () {
-//      _playQuestionAudio();
-//    });
   }
 
   void _startTimer() {
@@ -169,7 +167,9 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
 
     // Auto-play audio for new question
     Future.delayed(const Duration(milliseconds: 500), () {
-      _playQuestionAudio();
+      if (mounted) {
+        _playQuestionAudio();
+      }
     });
   }
 
@@ -177,7 +177,7 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
     if (_showResult) return;
 
     final userAnswer = _textController.text.toLowerCase().trim();
-    
+
     setState(() {
       _showResult = true;
       _totalAttempts++;
@@ -185,7 +185,7 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
       if (userAnswer == _correctAnswer) {
         // Play correct sound
         SoundService().playCorrect();
-        
+
         _correctAnswers++;
         if (_usedHintForCurrentQuestion) {
           _score += 0.5;
@@ -197,31 +197,16 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
         SoundService().playError();
       }
     });
-
-    // Auto-advance to next question after delay
-    Future.delayed(const Duration(milliseconds: 3000), () {
-      if (mounted) {
-        _nextQuestion();
-      }
-    });
   }
 
   void _markAsCorrect() {
     setState(() {
       _showResult = true;
-      _totalAttempts++;
       _correctAnswers++;
       if (_usedHintForCurrentQuestion) {
         _score += 0.5;
       } else {
         _score += 1.0;
-      }
-    });
-
-    // Auto-advance to next question after delay
-    Future.delayed(const Duration(milliseconds: 3000), () {
-      if (mounted) {
-        _nextQuestion();
       }
     });
   }
@@ -243,7 +228,7 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
 
   void _generateHintChoices() {
     if (_gameCards.isEmpty || _currentCardIndex >= _gameCards.length) return;
-    
+
     final Set<String> allAnswers = {};
     for (final card in widget.deck.cards) {
       allAnswers.add(card.sides[_answerSideIndex]);
@@ -270,7 +255,7 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
   void _endGame() {
     // Play game over sound
     SoundService().playGameOver();
-    
+
     _timer?.cancel();
     _showCompletionDialog();
   }
@@ -371,12 +356,11 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
                     DropdownButton<int>(
                       value: _questionSideIndex,
                       items: List.generate(
-                        widget.deck.cards.first.sides.length,
-                        (index) => DropdownMenuItem(
-                          value: index,
-                          child: Text(_getSideHeader(index)),
-                        ),
-                      ),
+                          widget.deck.cards.first.sides.length,
+                          (index) => DropdownMenuItem(
+                            value: index,
+                            child: Text(_getSideHeader(index)),
+                          )),
                       onChanged: (value) {
                         setState(() {
                           _questionSideIndex = value!;
@@ -394,12 +378,11 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
                     DropdownButton<int>(
                       value: _answerSideIndex,
                       items: List.generate(
-                        widget.deck.cards.first.sides.length,
-                        (index) => DropdownMenuItem(
-                          value: index,
-                          child: Text(_getSideHeader(index)),
-                        ),
-                      ),
+                          widget.deck.cards.first.sides.length,
+                          (index) => DropdownMenuItem(
+                            value: index,
+                            child: Text(_getSideHeader(index)),
+                          )),
                       onChanged: (value) {
                         setState(() {
                           _answerSideIndex = value!;
@@ -503,7 +486,7 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
             LinearProgressIndicator(
               value: (_currentCardIndex + 1) / _gameCards.length,
             ),
-            
+
             // Question counter
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -512,7 +495,7 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
                 style: Theme.of(context).textTheme.labelLarge,
               ),
             ),
-            
+
             // Audio question area
             Card(
               margin: const EdgeInsets.all(16.0),
@@ -573,7 +556,7 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
                 ),
               ),
             ),
-            
+
             // Answer input area
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -591,9 +574,10 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
                 ),
                 onSubmitted: (_) => _submitAnswer(),
                 autofocus: true,
+                enabled: !_showResult,
               ),
             ),
-            
+
             // Action buttons
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -622,7 +606,7 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
                         ),
                       ],
                     ),
-                  
+
                   if (_showResult)
                     Container(
                       width: double.infinity,
@@ -670,8 +654,6 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
                               style: TextStyle(color: Colors.white, fontSize: 14),
                             ),
                           if (_textController.text.toLowerCase().trim() != _correctAnswer)
-                            const SizedBox(height: 12),
-                          if (_textController.text.toLowerCase().trim() != _correctAnswer)
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
@@ -690,11 +672,26 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
                                 ),
                               ),
                             ),
+                          ElevatedButton(
+                            onPressed: _nextQuestion,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: _textController.text.toLowerCase().trim() == _correctAnswer ? Colors.green : Colors.red,
+                              padding: const EdgeInsets.all(12),
+                            ),
+                            child: const Text(
+                              'Next Question',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                  
-                  if (_showHint)
+
+                  if (_showHint && !_showResult)
                     Container(
                       height: 200,
                       margin: const EdgeInsets.only(top: 16),
