@@ -54,9 +54,25 @@ class DefaultDeckService {
               if (line.isNotEmpty) {
                 final List<String> sides = line.split(',');
                 if (sides.length >= 2) {
+                  // Check if first side contains Chinese characters
+                  String firstSide = sides[0].trim();
+                  List<int>? strokeOrder;
+                  
+                  // Extract first character to check for Chinese characters
+                  if (firstSide.isNotEmpty) {
+                    String firstCharacter = firstSide.substring(0, 1);
+                    // Only add stroke order data for Chinese characters (CJK range)
+                    if (firstCharacter.codeUnits.isNotEmpty && 
+                        firstCharacter.codeUnits[0] >= 0x4E00 && 
+                        firstCharacter.codeUnits[0] <= 0x9FFF) {
+                      strokeOrder = StrokeOrderHelper.getStrokeOrder(firstCharacter);
+                    }
+                  }
+                  
                   flashcards.add(Flashcard<String>(
                     id: 'default_${deckInfo['name']}_$i',
                     sides: sides.map((side) => side.trim()).toList(),
+                    strokeOrder: strokeOrder,
                   ));
                 }
               }
@@ -118,5 +134,37 @@ class DefaultDeckService {
     } catch (e) {
       print('Error saving default deck: $e');
     }
+  }
+
+  /// Load a specific deck by filename from localStorage
+  static Future<List<Flashcard<String>>> loadDeck(String fileName) async {
+    try {
+      print('🔍 Loading deck: $fileName');
+      
+      final decksJson = html.window.localStorage['flashcard_decks'];
+      if (decksJson != null && decksJson.isNotEmpty) {
+        final List<dynamic> decksList = jsonDecode(decksJson);
+        final deckJson = decksList.firstWhere(
+          (deck) => deck['title'] == fileName,
+          orElse: () => null
+        );
+        
+        if (deckJson != null) {
+          print('✅ Found deck in storage');
+          final deckString = DeckString.fromJson(deckJson);
+          final deck = deckString.toGenericDeck();
+          return deck.cards;
+        } else {
+          print('❌ Deck not found in storage: $fileName');
+        }
+      } else {
+        print('⚠️ No decks found in storage');
+      }
+    } catch (e) {
+      print('❌ Error loading deck $fileName: $e');
+    }
+    
+    // Return empty list if no deck found or error occurred
+    return [];
   }
 }

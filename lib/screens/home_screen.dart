@@ -15,6 +15,8 @@ import 'multiple_choice_game_screen.dart';
 import 'typing_game_screen.dart';
 import 'audio_typing_game_screen.dart';
 import 'help_screen.dart';
+import 'review_cards_study_screen.dart';
+import 'stroke_order_study_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -1422,14 +1424,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ? SizedBox(
                                       width: 100,
                                       child: TextButton.icon(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => DeckViewerScreen(deck: deck),
-                                            ),
-                                          );
-                                        },
+                                        onPressed: () => _showStudyMenu(deck),
                                         icon: const Icon(Icons.school, size: 16),
                                         label: const Text('Study'),
                                       ),
@@ -1437,14 +1432,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   : SizedBox(
                                       width: 48,
                                       child: IconButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => DeckViewerScreen(deck: deck),
-                                            ),
-                                          );
-                                        },
+                                        onPressed: () => _showStudyMenu(deck),
                                         icon: const Icon(Icons.school, size: 16),
                                         tooltip: 'Study',
                                       ),
@@ -1581,6 +1569,55 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
     }
+  }
+
+  void _showStudyMenu(Deck deck) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Study Mode - ${deck.title}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.menu_book),
+              title: const Text('Review Cards'),
+              subtitle: const Text('Review cards with flashcard mode'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DeckViewerScreen(deck: deck),
+                  ),
+                );
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('Stroke Order'),
+              subtitle: const Text('Practice Chinese stroke orders'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StrokeOrderStudyScreen(cards: deck.cards.cast<Flashcard<String>>()),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showGameMenu(Deck deck) {

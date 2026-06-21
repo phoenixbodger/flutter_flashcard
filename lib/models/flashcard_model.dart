@@ -11,13 +11,39 @@ class Flashcard<T> {
   
   // Optional headers for displaying side labels
   final List<String>? headers;
+  
+  // Stroke order data for Chinese characters
+  final List<int>? strokeOrder;
 
   Flashcard({
     required this.id,
     required this.sides,
     this.category = "General",
     this.headers,
+    this.strokeOrder,
   });
+}
+
+/// Helper class to generate stroke order data for Chinese characters
+class StrokeOrderHelper {
+  /// Get stroke order for a Chinese character (simplified implementation)
+  /// In a real application, this would use a proper Chinese character database
+  static List<int> getStrokeOrder(String character) {
+    // This is a placeholder - in reality, you'd want to use a proper stroke order database
+    // For now, return an empty list or a default pattern for demonstration
+    
+    // Simple heuristic: if it's a Chinese character (CJK Unified Ideographs)
+    if (character.codeUnits.isNotEmpty && 
+        character.codeUnits[0] >= 0x4E00 && 
+        character.codeUnits[0] <= 0x9FFF) {
+      // Return a default stroke order pattern for demonstration purposes
+      // In a real implementation, this would return the actual stroke order from a database
+      return [1, 2, 3, 4, 5]; // Default example - real implementation needed
+    }
+    
+    // Return empty list for non-Chinese characters
+    return [];
+  }
 }
 
 /// A Deck is simply a collection of these generic cards.
@@ -37,12 +63,14 @@ class FlashcardString {
   final List<String> sides;
   final String category;
   final List<String>? headers;
+  final List<int>? strokeOrder;
 
   FlashcardString({
     required this.id,
     required this.sides,
     this.category = "General",
     this.headers,
+    this.strokeOrder,
   });
 
   Map<String, dynamic> toJson() {
@@ -51,6 +79,7 @@ class FlashcardString {
       'sides': sides,
       'category': category,
       'headers': headers,
+      'strokeOrder': strokeOrder,
     };
   }
 
@@ -60,6 +89,7 @@ class FlashcardString {
       sides: List<String>.from(json['sides']),
       category: json['category'] ?? 'General',
       headers: json['headers'] != null ? List<String>.from(json['headers']) : null,
+      strokeOrder: json['strokeOrder'] != null ? List<int>.from(json['strokeOrder']) : null,
     );
   }
 }
