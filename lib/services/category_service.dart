@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:universal_html/html.dart' as html;
+import 'storage_service.dart';
 import '../models/category_model.dart';
 
 class CategoryService {
@@ -9,7 +9,7 @@ class CategoryService {
   // Get all categories
   static Future<List<Category>> getCategories() async {
     try {
-      final categoriesJson = html.window.localStorage[_categoriesKey];
+      final categoriesJson = StorageService.read(_categoriesKey);
       if (categoriesJson != null && categoriesJson.isNotEmpty) {
         final List<dynamic> categoriesList = jsonDecode(categoriesJson);
         return categoriesList.map((json) => Category.fromJson(json)).toList();
@@ -25,7 +25,7 @@ class CategoryService {
   static Future<void> saveCategories(List<Category> categories) async {
     try {
       final categoriesJson = jsonEncode(categories.map((cat) => cat.toJson()).toList());
-      html.window.localStorage[_categoriesKey] = categoriesJson;
+      StorageService.write(_categoriesKey, categoriesJson);
     } catch (e) {
       print('Error saving categories: $e');
     }

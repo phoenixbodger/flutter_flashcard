@@ -1,8 +1,8 @@
 import 'package:flutter/services.dart';
 import 'dart:convert';
-import 'package:universal_html/html.dart' as html;
 import '../models/flashcard_model.dart';
 import 'category_service.dart';
+import 'storage_service.dart';
 
 class DefaultDeckService {
   static const List<Map<String, String>> _defaultDecks = [
@@ -111,7 +111,7 @@ class DefaultDeckService {
   static Future<void> _saveDeckToStorage(Deck<String> deck) async {
     try {
       // Use existing localStorage logic from home_screen
-      final decksJson = html.window.localStorage['flashcard_decks'];
+      final decksJson = StorageService.read('flashcard_decks');
       List<Map<String, dynamic>> decksList = [];
       
       if (decksJson != null && decksJson.isNotEmpty) {
@@ -129,7 +129,7 @@ class DefaultDeckService {
         decksList.add(deckString.toJson());
         
         // Save back to storage
-        html.window.localStorage['flashcard_decks'] = jsonEncode(decksList);
+        StorageService.write('flashcard_decks', jsonEncode(decksList));
       }
     } catch (e) {
       print('Error saving default deck: $e');
@@ -141,7 +141,7 @@ class DefaultDeckService {
     try {
       print('🔍 Loading deck: $fileName');
       
-      final decksJson = html.window.localStorage['flashcard_decks'];
+      final decksJson = StorageService.read('flashcard_decks');
       if (decksJson != null && decksJson.isNotEmpty) {
         final List<dynamic> decksList = jsonDecode(decksJson);
         final deckJson = decksList.firstWhere(

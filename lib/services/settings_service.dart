@@ -1,4 +1,4 @@
-import 'dart:html' as html;
+import 'storage_service.dart';
 
 class SettingsService {
   static const String _compactModeKey = 'compact_mode_enabled';
@@ -12,10 +12,10 @@ class SettingsService {
   
   static Future<void> loadSettings() async {
     try {
-      final compactStored = html.window.localStorage[_compactModeKey];
+      final compactStored = StorageService.read(_compactModeKey);
       _isCompactMode = compactStored == 'true';
       
-      final soundsStored = html.window.localStorage[_soundsEnabledKey];
+      final soundsStored = StorageService.read(_soundsEnabledKey);
       _soundsEnabled = soundsStored != 'false'; // Default to true
     } catch (e) {
       _isCompactMode = false;
@@ -26,7 +26,7 @@ class SettingsService {
   static Future<void> setCompactMode(bool enabled) async {
     try {
       _isCompactMode = enabled;
-      html.window.localStorage[_compactModeKey] = enabled.toString();
+      StorageService.write(_compactModeKey, enabled.toString());
     } catch (e) {
       // Fallback: just update the in-memory value
       _isCompactMode = enabled;
@@ -36,7 +36,7 @@ class SettingsService {
   static Future<void> setSoundsEnabled(bool enabled) async {
     try {
       _soundsEnabled = enabled;
-      html.window.localStorage[_soundsEnabledKey] = enabled.toString();
+      StorageService.write(_soundsEnabledKey, enabled.toString());
     } catch (e) {
       // Fallback: just update the in-memory value
       _soundsEnabled = enabled;

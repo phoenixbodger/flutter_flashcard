@@ -8,6 +8,7 @@ import '../services/import_service.dart';
 import '../services/settings_service.dart';
 import '../services/default_deck_service.dart';
 import '../services/category_service.dart';
+import '../services/storage_service.dart';
 import 'deck_management_screen.dart';
 import 'deck_viewer_screen.dart';
 import 'match_game_screen.dart';
@@ -275,34 +276,34 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadDefaultDecksIfNeeded() async {
     try {
       print('🔍 Checking if default decks needed...');
-      final decksJson = html.window.localStorage['flashcard_decks'];
-      print('📊 Current decks in storage: ${decksJson?.length ?? 0} chars');
-      
-      // Always check if default category has decks
+
+      // Only seed defaults on first run (when the flag hasn't been set yet)
+      final hasBeenSeeded = StorageService.read('defaults_seeded') != null;
+      if (!hasBeenSeeded) {
+        print('📦 First run, seeding default decks...');
+        await DefaultDeckService.loadDefaultDecks();
+        StorageService.write('defaults_seeded', 'true');
+        print('✅ Default decks seeded');
+      }
+
+      // Always ensure default category exists
       await CategoryService.initializeDefaultCategory();
       final categories = await CategoryService.getCategories();
-      final defaultCategory = categories.firstWhere((cat) => cat.isDefault);
+      final defaultCategory = categories.firstWhere(
+        (cat) => cat.isDefault,
+        orElse: () => Category(
+          id: 'default',
+          name: 'Default',
+          deckIds: [],
+          createdAt: DateTime.now(),
+          isDefault: true,
+        ),
+      );
       print('📁 Default category "${defaultCategory.name}" has ${defaultCategory.deckIds.length} decks');
-      
-      if (decksJson == null || decksJson.isEmpty) {
-        print('📦 No decks found, loading defaults...');
-        // User has no decks, load defaults
-        await DefaultDeckService.loadDefaultDecks();
-        // Reload decks from storage after adding defaults
-        await _loadDecksFromStorage();
-        print('✅ Default decks loaded and reloaded');
-      } else if (defaultCategory.deckIds.isEmpty) {
-        print('📦 Decks exist but not in Default category, reassigning...');
-        // User has decks but default category is empty, reassign defaults
-        await DefaultDeckService.loadDefaultDecks();
-        await _loadDecksFromStorage();
-        print('✅ Default decks reassigned to Default category');
-      } else {
-        print('📋 User has decks, loading existing...');
-        // User has decks, just load them
-        await _loadDecksFromStorage();
-        print('✅ Existing decks loaded');
-      }
+
+      // Load whatever decks exist in storage (may be empty if user deleted them all)
+      await _loadDecksFromStorage();
+      print('✅ Decks loaded');
     } catch (e) {
       print('❌ Error checking for default decks: $e');
     }
@@ -311,7 +312,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Load decks from Local Storage
   Future<void> _loadDecksFromStorage() async {
     try {
-      final decksJson = html.window.localStorage['flashcard_decks'];
+      final decksJson = StorageService.read('flashcard_decks');
       if (decksJson != null && decksJson.isNotEmpty) {
         final List<dynamic> decksList = jsonDecode(decksJson);
         final List<Deck> loadedDecks = [];
@@ -346,7 +347,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final deckStrings = _decks.map((deck) => DeckString.fromGenericDeck(deck)).toList();
       final decksJson = jsonEncode(deckStrings.map((deckString) => deckString.toJson()).toList());
-      html.window.localStorage['flashcard_decks'] = decksJson;
+      StorageService.write('flashcard_decks', decksJson);
     } catch (e) {
       print('Error saving decks to storage: $e');
     }
@@ -873,7 +874,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Clear default decks from storage
   Future<void> _clearDefaultDecksFromStorage() async {
     try {
-      final decksJson = html.window.localStorage['flashcard_decks'];
+      final decksJson = StorageService.read('flashcard_decks');
       if (decksJson != null) {
         final List<dynamic> decksList = jsonDecode(decksJson);
         final defaultDeckNames = DefaultDeckService.defaultDeckNames.toSet();
@@ -884,7 +885,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }).toList();
         
         // Save filtered decks back to storage
-        html.window.localStorage['flashcard_decks'] = jsonEncode(filteredDecks);
+        StorageService.write('flashcard_decks', jsonEncode(filteredDecks));
         print('🗑️ Cleared default decks from storage');
       }
     } catch (e) {
@@ -972,6 +973,25 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
+          if (!StorageService.isPersistent)
+            Material(
+              color: Colors.orange[100],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    Icon(Icons.warning_amber, color: Colors.orange[800], size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Storage unavailable: your decks and settings will not be saved after this session.',
+                        style: TextStyle(color: Colors.orange[900], fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           // Category selector
           Container(
             padding: const EdgeInsets.all(16),

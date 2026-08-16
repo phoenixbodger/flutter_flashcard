@@ -363,6 +363,14 @@ For issues, questions, or feature requests:
 - Review code comments for implementation details
 - Use the in-app Help section (❓ button) for detailed guides
 
+## 📖 Stroke Order Feature
+
+**Chinese Character Stroke Order Visualization**
+- For Chinese characters in decks, stroke order animations are displayed when available
+- Each character's stroke order data is automatically detected and shown during study sessions
+- When multiple characters are present in a word, only the first character's stroke order is displayed
+- Users can navigate through words using previous/next buttons
+
 ---
 
 **Happy Learning! 🎓**
