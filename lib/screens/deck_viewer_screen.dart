@@ -96,7 +96,7 @@ class _DeckViewerScreenState extends State<DeckViewerScreen> {
           ),
           TextButton.icon(
             icon: const Icon(Icons.settings),
-            label: const Text('Settings'),
+            label: const Text('Start Side'),
             onPressed: _showSideSettings,
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.onSurface,
@@ -398,7 +398,7 @@ class _DeckViewerScreenState extends State<DeckViewerScreen> {
     final result = await showDialog<int>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Study Settings'),
+        title: const Text('Start Side'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
