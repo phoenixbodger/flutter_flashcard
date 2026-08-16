@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:math';
 import '../models/flashcard_model.dart';
 import '../services/sound_service.dart';
+import '../widgets/count_input_field.dart';
 
 class TypingGameScreen extends StatefulWidget {
   final Deck deck;
@@ -337,20 +338,17 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                Text('Number of questions: $dialogQuestionCount'),
-                Text('Available unique questions: $maxUniqueQuestions', 
-                     style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                Slider(
-                  value: dialogQuestionCount.toDouble(),
+                CountInputField(
+                  value: dialogQuestionCount,
                   min: 5,
-                  max: maxUniqueQuestions.toDouble(),
-                  divisions: maxUniqueQuestions > 5 ? maxUniqueQuestions - 5 : 1,
-                  label: '$dialogQuestionCount',
+                  max: maxUniqueQuestions,
                   onChanged: (value) {
                     setDialogState(() {
-                      dialogQuestionCount = value.round();
+                      dialogQuestionCount = value;
                     });
                   },
+                  label: 'Number of questions',
+                  helperText: 'Available unique questions: $maxUniqueQuestions',
                 ),
               ],
             ),
@@ -550,35 +548,20 @@ class _TypingGameScreenState extends State<TypingGameScreen> {
             const SizedBox(height: 24),
             
             // Number of questions
-            const Text(
-              'Number of questions:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 16),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Text(
-                      '$_questionCount questions',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    Text('Available unique questions: $maxUniqueQuestions', 
-                         style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                    Slider(
-                      value: _questionCount.toDouble(),
-                      min: 5,
-                      max: maxUniqueQuestions.toDouble(),
-                      divisions: maxUniqueQuestions > 5 ? maxUniqueQuestions - 5 : 1,
-                      label: '$_questionCount',
-                      onChanged: (value) {
-                        setState(() {
-                          _questionCount = value.round();
-                        });
-                      },
-                    ),
-                  ],
+                child: CountInputField(
+                  value: _questionCount,
+                  min: 5,
+                  max: maxUniqueQuestions,
+                  onChanged: (value) {
+                    setState(() {
+                      _questionCount = value;
+                    });
+                  },
+                  label: 'Number of questions',
+                  helperText: 'Available unique questions: $maxUniqueQuestions',
                 ),
               ),
             ),

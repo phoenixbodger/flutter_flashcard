@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:math';
 import '../models/flashcard_model.dart';
 import '../services/sound_service.dart';
+import '../widgets/count_input_field.dart';
 
 class MatchGameScreen extends StatefulWidget {
   final Deck deck;
@@ -223,18 +224,17 @@ class _MatchGameScreenState extends State<MatchGameScreen> {
                   ),
                   const SizedBox(height: 16),
                 ],
-                Text('Number of pairs: $dialogPairCount'),
-                Slider(
-                  value: dialogPairCount.toDouble(),
+                CountInputField(
+                  value: dialogPairCount,
                   min: 2,
-                  max: widget.deck.cards.length.toDouble(),
-                  divisions: widget.deck.cards.length > 2 ? widget.deck.cards.length - 1 : 1,
-                  label: '$dialogPairCount',
+                  max: widget.deck.cards.length,
                   onChanged: (value) {
                     setDialogState(() {
-                      dialogPairCount = value.round();
+                      dialogPairCount = value;
                     });
                   },
+                  label: 'Number of pairs',
+                  helperText: 'Available pairs: ${widget.deck.cards.length}',
                 ),
               ],
             ),
@@ -405,33 +405,20 @@ class _MatchGameScreenState extends State<MatchGameScreen> {
             ],
             
             // Number of pairs
-            const Text(
-              'Number of pairs:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 16),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Text(
-                      '$_pairCount pairs',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    Slider(
-                      value: _pairCount.toDouble(),
-                      min: 2,
-                      max: widget.deck.cards.length.toDouble(),
-                      divisions: widget.deck.cards.length > 2 ? widget.deck.cards.length - 1 : 1,
-                      label: '$_pairCount',
-                      onChanged: (value) {
-                        setState(() {
-                          _pairCount = value.round();
-                        });
-                      },
-                    ),
-                  ],
+                child: CountInputField(
+                  value: _pairCount,
+                  min: 2,
+                  max: widget.deck.cards.length,
+                  onChanged: (value) {
+                    setState(() {
+                      _pairCount = value;
+                    });
+                  },
+                  label: 'Number of pairs',
+                  helperText: 'Available pairs: ${widget.deck.cards.length}',
                 ),
               ),
             ),

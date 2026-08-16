@@ -5,6 +5,7 @@ import '../models/flashcard_model.dart';
 import '../services/enhanced_tts_service.dart';
 import '../services/sound_service.dart';
 import '../services/settings_service.dart';
+import '../widgets/count_input_field.dart';
 
 
 class AudioTypingGameScreen extends StatefulWidget {
@@ -395,21 +396,17 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
                   ],
                 ),
               const SizedBox(height: 32),
-              Text(
-                'Number of Questions: $_questionCount',
-                style: const TextStyle(fontSize: 16),
-              ),
-              Slider(
-                value: _questionCount.toDouble(),
+              CountInputField(
+                value: _questionCount,
                 min: 1,
-                max: widget.deck.cards.length.toDouble(),
-                divisions: widget.deck.cards.length > 1 ? widget.deck.cards.length - 1 : 1,
-                label: '$_questionCount questions',
+                max: widget.deck.cards.length,
                 onChanged: (value) {
                   setState(() {
-                    _questionCount = value.round();
+                    _questionCount = value;
                   });
                 },
+                label: 'Number of questions',
+                helperText: 'Available questions: ${widget.deck.cards.length}',
               ),
               const SizedBox(height: 32),
               ElevatedButton(
