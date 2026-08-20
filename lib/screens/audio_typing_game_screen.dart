@@ -324,100 +324,107 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
         appBar: AppBar(
           title: const Text('Audio Typing Game'),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.hearing,
-                size: 80,
-                color: Colors.blue,
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Audio Typing Game',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Listen to the audio and type what you hear. Perfect for pronunciation practice!',
-                style: TextStyle(fontSize: 16),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              if (widget.deck.cards.isNotEmpty && widget.deck.cards.first.sides.length > 1)
-                Column(
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight - 32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      'Question Side:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    const Icon(
+                      Icons.hearing,
+                      size: 80,
+                      color: Colors.blue,
                     ),
-                    DropdownButton<int>(
-                      value: _questionSideIndex,
-                      items: List.generate(
-                          widget.deck.cards.first.sides.length,
-                          (index) => DropdownMenuItem(
-                            value: index,
-                            child: Text(_getSideHeader(index)),
-                          )),
-                      onChanged: (value) {
-                        setState(() {
-                          _questionSideIndex = value!;
-                          if (_questionSideIndex == _answerSideIndex) {
-                            _answerSideIndex = (_answerSideIndex + 1) % widget.deck.cards.first.sides.length;
-                          }
-                        });
-                      },
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Audio Typing Game',
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      'Answer Side:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      'Listen to the audio and type what you hear. Perfect for pronunciation practice!',
+                      style: TextStyle(fontSize: 16),
+                      textAlign: TextAlign.center,
                     ),
-                    DropdownButton<int>(
-                      value: _answerSideIndex,
-                      items: List.generate(
-                          widget.deck.cards.first.sides.length,
-                          (index) => DropdownMenuItem(
-                            value: index,
-                            child: Text(_getSideHeader(index)),
-                          )),
+                    const SizedBox(height: 32),
+                    if (widget.deck.cards.isNotEmpty && widget.deck.cards.first.sides.length > 1)
+                      Column(
+                        children: [
+                          const Text(
+                            'Question Side:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          DropdownButton<int>(
+                            value: _questionSideIndex,
+                            items: List.generate(
+                                widget.deck.cards.first.sides.length,
+                                (index) => DropdownMenuItem(
+                                  value: index,
+                                  child: Text(_getSideHeader(index)),
+                                )),
+                            onChanged: (value) {
+                              setState(() {
+                                _questionSideIndex = value!;
+                                if (_questionSideIndex == _answerSideIndex) {
+                                  _answerSideIndex = (_answerSideIndex + 1) % widget.deck.cards.first.sides.length;
+                                }
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Answer Side:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          DropdownButton<int>(
+                            value: _answerSideIndex,
+                            items: List.generate(
+                                widget.deck.cards.first.sides.length,
+                                (index) => DropdownMenuItem(
+                                  value: index,
+                                  child: Text(_getSideHeader(index)),
+                                )),
+                            onChanged: (value) {
+                              setState(() {
+                                _answerSideIndex = value!;
+                                if (_answerSideIndex == _questionSideIndex) {
+                                  _questionSideIndex = (_questionSideIndex + 1) % widget.deck.cards.first.sides.length;
+                                }
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    const SizedBox(height: 32),
+                    CountInputField(
+                      value: _questionCount,
+                      min: 1,
+                      max: widget.deck.cards.length,
                       onChanged: (value) {
                         setState(() {
-                          _answerSideIndex = value!;
-                          if (_answerSideIndex == _questionSideIndex) {
-                            _questionSideIndex = (_questionSideIndex + 1) % widget.deck.cards.first.sides.length;
-                          }
+                          _questionCount = value;
                         });
                       },
+                      label: 'Number of questions',
+                      helperText: 'Available questions: ${widget.deck.cards.length}',
+                    ),
+                    const SizedBox(height: 32),
+                    ElevatedButton(
+                      onPressed: _startGame,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      ),
+                      child: const Text('Start Game', style: TextStyle(fontSize: 18)),
                     ),
                   ],
                 ),
-              const SizedBox(height: 32),
-              CountInputField(
-                value: _questionCount,
-                min: 1,
-                max: widget.deck.cards.length,
-                onChanged: (value) {
-                  setState(() {
-                    _questionCount = value;
-                  });
-                },
-                label: 'Number of questions',
-                helperText: 'Available questions: ${widget.deck.cards.length}',
               ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _startGame,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                ),
-                child: const Text('Start Game', style: TextStyle(fontSize: 18)),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       );
     }
@@ -475,7 +482,7 @@ class _AudioTypingGameScreenState extends State<AudioTypingGameScreen> {
           ),
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
